@@ -1,10 +1,22 @@
+"use client";
+
+import { useTheme } from "@/context/ThemeContext";
+
 export default function HomePage() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-semibold">Welcome</h2>
-      <p className="text-white/70">
-        This is our private space. Write memories. Save moments. Come back anytime.
-      </p>
-    </div>
+    <main className="min-h-screen flex flex-col items-center justify-center gap-6">
+      <h1 className="text-3xl font-bold">
+        Relationship Diary 💕
+      </h1>
+
+      <button
+        onClick={toggleTheme}
+        className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700"
+      >
+        Switch to {theme === "light" ? "Dark" : "Light"} Mode
+      </button>
+    </main>
   );
 }
