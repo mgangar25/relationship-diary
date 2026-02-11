@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -16,10 +17,18 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  async function handleLogout() {
+    await logout();
+    router.replace("/login");
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center gap-6 px-6 py-4 overflow-x-auto">
+        {/* Left: Navigation links */}
         {navItems.map(item => {
           const active = pathname === item.href;
 
@@ -27,7 +36,7 @@ export default function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative whitespace-nowrap font-medium transition-all
+              className={`relative whitespace-nowrap font-medium transition-colors
                 ${
                   active
                     ? "text-pink-500"
@@ -43,6 +52,17 @@ export default function Navbar() {
             </Link>
           );
         })}
+
+        {/* Spacer pushes logout to the right */}
+        <div className="flex-1" />
+
+        {/* Right: Logout */}
+        <button
+          onClick={handleLogout}
+          className="text-sm font-medium text-gray-500 hover:text-pink-500 transition-colors"
+        >
+          Logout
+        </button>
       </div>
     </nav>
   );

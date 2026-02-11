@@ -1,6 +1,8 @@
 import "./globals.css";
-import { ThemeProvider } from "@/context/ThemeContext";
 import Navbar from "@/components/Navbar";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { AuthProvider } from "@/context/AuthContext";
+import ProtectedLayout from "@/components/ProtectedLayout";
 
 export default function RootLayout({
   children,
@@ -11,8 +13,12 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-white text-black dark:bg-gray-900 dark:text-gray-100 transition-colors">
         <ThemeProvider>
-          <Navbar />
-          {children}
+          <AuthProvider>
+            <ProtectedLayout>
+              <Navbar />
+              {children}
+            </ProtectedLayout>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
