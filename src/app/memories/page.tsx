@@ -8,8 +8,11 @@ import {
   orderBy,
   query,
   Timestamp,
+  updateDoc,
+  doc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext";
 
 type Memory = {
   id: string;
@@ -20,8 +23,11 @@ type Memory = {
 };
 
 export default function MemoriesPage() {
+  const { user } = useAuth();
+
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
 
   useEffect(() => {
     async function fetchMemories() {
@@ -44,6 +50,34 @@ export default function MemoriesPage() {
     fetchMemories();
   }, []);
 
+  // EDIT CAPTION
+  const handleEdit = async (memory: Memory) => {
+    const newCaption = prompt("Edit caption:", memory.caption);
+    if (!newCaption) return;
+
+    try {
+      await updateDoc(doc(db, "memories", memory.id), {
+        caption: newCaption,
+      });
+
+      setMemories(prev =>
+        prev.map(m =>
+          m.id === memory.id ? { ...m, caption: newCaption } : m
+        )
+      );
+
+      if (selectedMemory?.id === memory.id) {
+        setSelectedMemory({
+          ...memory,
+          caption: newCaption,
+        });
+      }
+    } catch (error) {
+      console.error("Edit failed:", error);
+      alert("Could not update caption.");
+    }
+  };
+
   return (
     <main className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
@@ -55,7 +89,6 @@ export default function MemoriesPage() {
         </Link>
       </div>
 
-      {/* Content */}
       {loading ? (
         <p className="page-subtext">Loading memories…</p>
       ) : memories.length === 0 ? (
@@ -68,7 +101,11 @@ export default function MemoriesPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {memories.map(memory => (
-            <div key={memory.id} className="card p-0 overflow-hidden">
+            <div
+              key={memory.id}
+              className="card p-0 overflow-hidden cursor-pointer"
+              onClick={() => setSelectedMemory(memory)}
+            >
               <img
                 src={memory.imageUrl}
                 alt={memory.caption || "Memory"}
@@ -93,11 +130,62 @@ export default function MemoriesPage() {
                     </span>
                   )}
                 </div>
+
+                {user?.email === memory.authorEmail && (
+                  <div
+                    className="pt-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      onClick={() => handleEdit(memory)}
+                      className="text-blue-500 text-xs"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* MODAL */}
+      {selectedMemory && (
+        <div
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+          onClick={() => setSelectedMemory(null)}
+        >
+          <div
+            className="bg-white dark:bg-neutral-900 p-6 rounded-xl max-w-3xl w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={selectedMemory.imageUrl}
+              alt="Memory"
+              className="w-full max-h-[70vh] object-contain rounded-lg"
+            />
+
+            {selectedMemory.caption && (
+              <p className="mt-4 text-gray-700 dark:text-gray-300">
+                {selectedMemory.caption}
+              </p>
+            )}
+
+            {user?.email === selectedMemory.authorEmail && (
+              <div className="mt-4">
+                <button
+                  onClick={() => handleEdit(selectedMemory)}
+                  className="text-blue-500 text-sm"
+                >
+                  Edit Caption
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
+
