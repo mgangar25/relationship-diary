@@ -27,16 +27,29 @@ export default function LettersPage() {
   const { user } = useAuth();
   const [letters, setLetters] = useState<Letter[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"inbox" | "sent">("inbox");
 
   useEffect(() => {
     async function fetchLetters() {
       if (!user?.email) return;
 
-      const q = query(
-        collection(db, "letters"),
-        where("recipientEmail", "==", user.email),
-        orderBy("createdAt", "desc")
-      );
+      setLoading(true);
+
+      let q;
+
+      if (activeTab === "inbox") {
+        q = query(
+          collection(db, "letters"),
+          where("recipientEmail", "==", user.email),
+          orderBy("createdAt", "desc")
+        );
+      } else {
+        q = query(
+          collection(db, "letters"),
+          where("senderEmail", "==", user.email),
+          orderBy("createdAt", "desc")
+        );
+      }
 
       const snapshot = await getDocs(q);
 
@@ -50,23 +63,52 @@ export default function LettersPage() {
     }
 
     fetchLetters();
-  }, [user]);
+  }, [user, activeTab]);
 
   return (
     <main className="p-6 max-w-3xl mx-auto space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="page-title">Inbox 💌</h1>
+        <h1 className="page-title">Letters 💌</h1>
 
         <Link href="/letters/new" className="btn btn-primary">
           New Letter
         </Link>
       </div>
 
+      {/* Toggle Tabs */}
+      <div className="flex gap-6 border-b pb-2">
+        <button
+          onClick={() => setActiveTab("inbox")}
+          className={`pb-1 transition ${
+            activeTab === "inbox"
+              ? "border-b-2 border-pink-500 font-semibold"
+              : "text-gray-500"
+          }`}
+        >
+          Inbox
+        </button>
+
+        <button
+          onClick={() => setActiveTab("sent")}
+          className={`pb-1 transition ${
+            activeTab === "sent"
+              ? "border-b-2 border-pink-500 font-semibold"
+              : "text-gray-500"
+          }`}
+        >
+          Sent
+        </button>
+      </div>
+
+      {/* Content */}
       {loading ? (
         <p className="page-subtext">Loading letters…</p>
       ) : letters.length === 0 ? (
         <div className="card text-center py-10">
-          <p className="text-lg font-medium">No letters yet 💭</p>
+          <p className="text-lg font-medium">
+            No letters in {activeTab}.
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -80,13 +122,15 @@ export default function LettersPage() {
                 <div className="flex justify-between items-center">
                   <h2
                     className={`text-lg ${
-                      !letter.read ? "font-bold" : "font-semibold"
+                      activeTab === "inbox" && !letter.read
+                        ? "font-bold"
+                        : "font-semibold"
                     }`}
                   >
                     {letter.subject}
                   </h2>
 
-                  {!letter.read && (
+                  {activeTab === "inbox" && !letter.read && (
                     <span className="text-xs text-red-500">
                       New
                     </span>
@@ -98,7 +142,11 @@ export default function LettersPage() {
                 </p>
 
                 <div className="mt-4 text-sm text-gray-500 flex justify-between">
-                  <span>From: {letter.senderEmail}</span>
+                  <span>
+                    {activeTab === "inbox"
+                      ? `From: ${letter.senderEmail}`
+                      : `To: ${letter.recipientEmail}`}
+                  </span>
 
                   {letter.createdAt?.toDate && (
                     <span>
