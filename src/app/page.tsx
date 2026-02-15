@@ -187,12 +187,11 @@ export default function HomePage() {
         className="card glass relative overflow-hidden"
       >
         <h1 className="text-4xl md:text-5xl font-extrabold text-gradient">
-          Malay ❤️ Shruti
+          Golu Diary
         </h1>
 
         <p className="mt-3 text-gray-600 dark:text-gray-300 text-lg">
-          Our private space for memories,
-          love letters, and little moments.
+          Our private space for memories and little moments.
         </p>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
