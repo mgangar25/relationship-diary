@@ -23,7 +23,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuth();
-
   const [unreadCount, setUnreadCount] = useState<number>(0);
 
   useEffect(() => {
@@ -52,7 +51,8 @@ export default function Navbar() {
   if (pathname === "/login") return null;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-pink-100 dark:border-gray-700 bg-white/70 dark:bg-gray-900/60 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b bg-white/70 dark:bg-gray-900/60 backdrop-blur-xl"
+         style={{ borderColor: "var(--accent-200)" }}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center gap-6 py-4 overflow-x-auto">
           {navItems.map((item) => {
@@ -64,8 +64,8 @@ export default function Navbar() {
                   href={item.href}
                   className={`relative whitespace-nowrap font-medium transition-colors ${
                     active
-                      ? "text-pink-600"
-                      : "text-gray-600 dark:text-gray-300 hover:text-pink-500"
+                      ? "rd-accent-text"
+                      : "text-gray-600 dark:text-gray-300 hover:rd-accent-text"
                   }`}
                 >
                   {item.name}
@@ -74,12 +74,16 @@ export default function Navbar() {
                 {active && (
                   <motion.div
                     layoutId="nav-underline"
-                    className="absolute -bottom-1 left-0 h-[2px] w-full rounded-full bg-pink-500"
+                    className="absolute -bottom-1 left-0 h-[2px] w-full rounded-full"
+                    style={{ backgroundColor: "var(--accent-500)" }}
                   />
                 )}
 
                 {item.href === "/letters" && unreadCount > 0 && (
-                  <span className="badge-pulse absolute -top-2 -right-3 bg-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md">
+                  <span
+                    className="badge-pulse absolute -top-2 -right-3 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md"
+                    style={{ backgroundColor: "var(--accent-500)" }}
+                  >
                     {unreadCount}
                   </span>
                 )}
@@ -91,7 +95,8 @@ export default function Navbar() {
 
           <button
             onClick={handleLogout}
-            className="text-sm font-medium text-gray-500 hover:text-pink-500 transition-colors"
+            className="text-sm font-medium text-gray-500 hover:rd-accent-text transition-colors"
+            type="button"
           >
             Logout
           </button>

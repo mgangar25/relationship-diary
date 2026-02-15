@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useTheme } from "@/context/ThemeContext";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore";
@@ -16,7 +15,7 @@ type MoodType = { userEmail: string; mood: string };
 type EntryType = { title: string; body: string };
 
 export default function HomePage() {
-  const { theme, toggleTheme } = useTheme();
+
 
   const [moods, setMoods] = useState<MoodType[]>([]);
   const [latestEntry, setLatestEntry] = useState<EntryType | null>(null);
@@ -106,9 +105,6 @@ export default function HomePage() {
             <Link href="/mood" className="btn btn-primary">
               Update Mood
             </Link>
-            <button onClick={toggleTheme} className="btn btn-secondary">
-              Switch to {theme === "light" ? "Dark" : "Light"} Mode
-            </button>
           </div>
         </div>
 

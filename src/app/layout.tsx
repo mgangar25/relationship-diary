@@ -1,6 +1,5 @@
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import { ThemeProvider } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import ProtectedLayout from "@/components/ProtectedLayout";
@@ -14,7 +13,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider>
+        
           <AuthProvider>
             <SettingsProvider>
               <ProtectedLayout>
@@ -27,7 +26,7 @@ export default function RootLayout({
               </ProtectedLayout>
             </SettingsProvider>
           </AuthProvider>
-        </ThemeProvider>
+    
       </body>
     </html>
   );

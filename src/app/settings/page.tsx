@@ -429,10 +429,15 @@ function TabButton({
   return (
     <button
       onClick={onClick}
+      style={
+        active
+          ? { backgroundColor: "var(--accent-500)" }
+          : { borderColor: "var(--accent-200)" }
+      }
       className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
         active
-          ? "bg-pink-500 text-white shadow"
-          : "bg-white/70 dark:bg-gray-800/70 border border-pink-100 dark:border-gray-700 hover:scale-[1.03]"
+          ? "text-white shadow"
+          : "bg-white/70 dark:bg-gray-800/70 border dark:border-gray-700 hover:scale-[1.03]"
       }`}
       type="button"
     >
@@ -440,6 +445,7 @@ function TabButton({
     </button>
   );
 }
+
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -454,8 +460,9 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
   return (
     <button
       onClick={() => onChange(!checked)}
+      style={checked ? { backgroundColor: "var(--accent-500)" } : undefined}
       className={`w-16 h-9 rounded-full p-1 transition flex items-center ${
-        checked ? "bg-pink-500" : "bg-gray-300 dark:bg-gray-700"
+        checked ? "" : "bg-gray-300 dark:bg-gray-700"
       }`}
       type="button"
     >
