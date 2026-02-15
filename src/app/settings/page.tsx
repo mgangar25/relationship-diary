@@ -37,10 +37,7 @@ export default function SettingsPage() {
     setSaving(true);
 
     await patchSettings({
-      [section]: {
-        ...settings[section],
-        ...patch,
-      },
+      [section]: patch,
     } as Partial<typeof settings>);
 
     setSaving(false);
