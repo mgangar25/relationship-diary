@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
+  limit,
+} from "firebase/firestore";
 import { motion } from "framer-motion";
 import { db } from "@/lib/firebase";
 
@@ -10,11 +16,12 @@ export default function StatsPage() {
   const [letters, setLetters] = useState(0);
   const [memories, setMemories] = useState(0);
   const [firstEntryDate, setFirstEntryDate] = useState<Date | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // 💕 Relationship Start Date
   const relationshipStartDate = new Date("2025-12-27");
 
-  // ✅ Clean day calculation (no timezone bugs)
+  // Clean day calculation
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -22,32 +29,36 @@ export default function StatsPage() {
   start.setHours(0, 0, 0, 0);
 
   const daysTogether = Math.max(
-    Math.floor(
-      (today.getTime() - start.getTime()) /
-        (1000 * 60 * 60 * 24)
-    ),
+    Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)),
     0
   );
 
   useEffect(() => {
-    const unsubDiary = onSnapshot(
+    // Count diary entries
+    const unsubDiaryCount = onSnapshot(
       collection(db, "diaryEntries"),
       (snapshot) => {
         setEntries(snapshot.size);
-
-        if (snapshot.docs.length > 0) {
-          const sorted = snapshot.docs.sort(
-            (a, b) =>
-              a.data().createdAt?.seconds -
-              b.data().createdAt?.seconds
-          );
-
-          setFirstEntryDate(
-            new Date(sorted[0].data().createdAt.seconds * 1000)
-          );
-        }
       }
     );
+
+    // Get FIRST diary entry safely
+    const firstEntryQuery = query(
+      collection(db, "diaryEntries"),
+      orderBy("createdAt", "asc"),
+      limit(1)
+    );
+
+    const unsubFirstEntry = onSnapshot(firstEntryQuery, (snapshot) => {
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        const ts = doc.data().createdAt;
+        if (ts?.seconds) {
+          setFirstEntryDate(new Date(ts.seconds * 1000));
+        }
+      }
+      setLoading(false);
+    });
 
     const unsubLetters = onSnapshot(
       collection(db, "letters"),
@@ -64,7 +75,8 @@ export default function StatsPage() {
     );
 
     return () => {
-      unsubDiary();
+      unsubDiaryCount();
+      unsubFirstEntry();
       unsubLetters();
       unsubMemories();
     };
@@ -85,18 +97,26 @@ export default function StatsPage() {
           Together since December 27, 2025 ✨
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <StatCard title="Days Together" value={daysTogether} />
-          <StatCard title="Diary Entries" value={entries} />
-          <StatCard title="Letters Written" value={letters} />
-          <StatCard title="Memories Saved" value={memories} />
-        </div>
-
-        {firstEntryDate && (
-          <p className="mt-10 text-sm text-gray-500 dark:text-gray-400">
-            First diary entry on{" "}
-            {firstEntryDate.toDateString()} 🥹
+        {loading ? (
+          <p className="text-gray-500 dark:text-gray-400">
+            Loading your memories...
           </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <StatCard title="Days Together" value={daysTogether} />
+              <StatCard title="Diary Entries" value={entries} />
+              <StatCard title="Letters Written" value={letters} />
+              <StatCard title="Memories Saved" value={memories} />
+            </div>
+
+            {firstEntryDate && (
+              <p className="mt-10 text-sm text-gray-500 dark:text-gray-400">
+                First diary entry on{" "}
+                {firstEntryDate.toDateString()} 🥹
+              </p>
+            )}
+          </>
         )}
       </motion.div>
     </div>

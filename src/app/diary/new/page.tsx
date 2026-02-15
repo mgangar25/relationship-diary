@@ -22,7 +22,7 @@ export default function NewDiaryEntryPage() {
     await addDoc(collection(db, "diaryEntries"), {
       title,
       body,
-      authorId: user.id,
+      authorId: user.uid,
       authorEmail: user.email,
       createdAt: serverTimestamp(),
     });

@@ -2,7 +2,9 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { SettingsProvider } from "@/context/SettingsContext";
 import ProtectedLayout from "@/components/ProtectedLayout";
+import AppShell from "@/components/AppShell";
 
 export default function RootLayout({
   children,
@@ -11,13 +13,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-white text-black dark:bg-gray-900 dark:text-gray-100 transition-colors">
+      <body>
         <ThemeProvider>
           <AuthProvider>
-            <ProtectedLayout>
-              <Navbar />
-              {children}
-            </ProtectedLayout>
+            <SettingsProvider>
+              <ProtectedLayout>
+                <AppShell>
+                  <Navbar />
+                  <main className="max-w-6xl mx-auto px-6 py-8">
+                    {children}
+                  </main>
+                </AppShell>
+              </ProtectedLayout>
+            </SettingsProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
