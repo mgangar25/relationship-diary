@@ -14,124 +14,98 @@ function formatDate(d: Date) {
   return d.toISOString().split("T")[0];
 }
 
-function getNextMonthly27(today: Date) {
+function getNext27th() {
+  const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
 
-  const thisMonth27 = new Date(year, month, 27);
+  let next = new Date(year, month, 27);
 
-  if (today.getDate() <= 27) {
-    return thisMonth27;
+  if (today.getDate() >= 27) {
+    next = new Date(year, month + 1, 27);
   }
 
-  return new Date(year, month + 1, 27);
+  return next;
 }
 
-function getNextAnniversary(today: Date) {
-  const year = today.getFullYear();
-  const anniversary = new Date(year, 11, 27); // Dec 27
+function getNextAnniversary() {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const anniversary = new Date(currentYear, 11, 27); // December 27
 
-  if (today <= anniversary) return anniversary;
+  if (today > anniversary) {
+    return new Date(currentYear + 1, 11, 27);
+  }
 
-  return new Date(year + 1, 11, 27);
-}
-
-function getNextBirthday(month: number, day: number, today: Date) {
-  const year = today.getFullYear();
-  const thisYear = new Date(year, month, day);
-
-  if (today <= thisYear) return thisYear;
-
-  return new Date(year + 1, month, day);
+  return anniversary;
 }
 
 export default function Timeline() {
-  const today = new Date();
+  const next27th = useMemo(() => getNext27th(), []);
+  const nextAnniversary = useMemo(() => getNextAnniversary(), []);
 
-  const milestones = useMemo(() => {
-    const next27 = getNextMonthly27(today);
-    const nextAnniversary = getNextAnniversary(today);
-
-    const malayBirthday = getNextBirthday(7, 25, today); // Aug 25
-    const shrutiBirthday = getNextBirthday(8, 1, today); // Sep 1
-
-    const list: Milestone[] = [
-      {
-        title: "Together begins",
-        subtitle: "Our journey starts 💖",
-        date: RELATIONSHIP_START,
-      },
-      {
-        title: "Monthly Milestone 💞",
-        subtitle: "Every 27th matters",
-        date: formatDate(next27),
-      },
-      {
-        title: "Anniversary 🎉",
-        subtitle: "December 27",
-        date: formatDate(nextAnniversary),
-      },
-      {
-        title: "Malay’s Birthday 🎂",
-        date: formatDate(malayBirthday),
-      },
-      {
-        title: "Shruti’s Birthday 🎂",
-        date: formatDate(shrutiBirthday),
-      },
-    ];
-
-    return list;
-  }, []);
-
-  const upcoming = useMemo(() => {
-    const future = milestones
-      .filter((m) => new Date(m.date) >= today)
-      .sort((a, b) => +new Date(a.date) - +new Date(b.date));
-
-    return future[0];
-  }, [milestones]);
+  const milestones: Milestone[] = [
+    {
+      title: "Together begins",
+      subtitle: "Our journey starts 💖",
+      date: RELATIONSHIP_START,
+    },
+    {
+      title: "Anniversary 🎉",
+      subtitle: "December 27",
+      date: formatDate(nextAnniversary),
+    },
+    {
+      title: "Malay’s Birthday 🎂",
+      date: "2026-08-25",
+    },
+    {
+      title: "Shruti’s Birthday 🎂",
+      date: "2026-09-01",
+    },
+  ];
 
   return (
-    <div className="card">
+    <div className="card relative overflow-hidden">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-xl font-semibold">Milestones</h2>
+          <h2 className="text-xl font-semibold">
+            Milestones
+          </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             The important dates that matter to us ✨
           </p>
         </div>
 
-        {upcoming && (
-          <div className="px-4 py-2 rounded-xl bg-purple-500/10 border border-purple-500/30">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Next up
-            </p>
-            <p className="font-semibold">
-              {upcoming.title}
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {upcoming.date}
-            </p>
-          </div>
-        )}
+        {/* NEXT UP BOX */}
+        <div className="px-5 py-4 rounded-2xl border border-purple-400/30 bg-purple-500/10 backdrop-blur">
+          <p className="text-sm text-gray-400">Next up</p>
+          <p className="font-semibold text-purple-400">
+            Monthly Milestone 💕
+          </p>
+          <p className="text-sm text-gray-400">
+            {formatDate(next27th)}
+          </p>
+        </div>
       </div>
 
+      {/* LIST */}
       <div className="space-y-4">
-        {milestones.map((m, i) => (
+        {milestones.map((m, index) => (
           <div
-            key={i}
-            className="flex justify-between items-center p-4 rounded-2xl bg-white/60 dark:bg-slate-800/50 border border-white/10"
+            key={index}
+            className="flex justify-between items-center p-5 rounded-2xl border border-white/10 bg-white/5"
           >
             <div>
-              <p className="font-semibold">{m.title}</p>
+              <p className="font-medium">{m.title}</p>
               {m.subtitle && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-400">
                   {m.subtitle}
                 </p>
               )}
             </div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+
+            <p className="text-gray-400 text-sm">
               {m.date}
             </p>
           </div>
