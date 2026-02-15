@@ -67,6 +67,8 @@ export default function CalendarPage() {
   const { user } = useAuth();
   const today = new Date();
 
+  const relationshipStart = new Date("2025-12-27");
+
   const [currentMonth, setCurrentMonth] = useState(
     new Date(today.getFullYear(), today.getMonth(), 1)
   );
@@ -234,7 +236,15 @@ export default function CalendarPage() {
     await deleteDoc(doc(db, "events", id));
   }
 
-  /* ---------------- BIRTHDAY ---------------- */
+  /* ---------------- SPECIAL DAY CHECKS ---------------- */
+
+  function isMilestone(day: number) {
+    return day === 27;
+  }
+
+  function isAnniversary(day: number) {
+    return day === 27 && month === 11;
+  }
 
   function isBirthday(day: number) {
     if (month === 7 && day === 25) return true;
@@ -262,11 +272,14 @@ export default function CalendarPage() {
 
             const isToday =
               day &&
-              year === new Date().getFullYear() &&
-              month === new Date().getMonth() &&
-              day === new Date().getDate();
+              year === today.getFullYear() &&
+              month === today.getMonth() &&
+              day === today.getDate();
 
             const hasActivity = formatted && activityMap[formatted];
+
+            const milestone = day ? isMilestone(day) : false;
+            const anniversary = day ? isAnniversary(day) : false;
             const birthday = day ? isBirthday(day) : false;
 
             return (
@@ -281,7 +294,9 @@ export default function CalendarPage() {
                   }
                   ${isSelected ? "ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/20" : ""}
                   ${isToday ? "border-2 border-pink-500" : ""}
-                  ${birthday ? "bg-pink-100 dark:bg-pink-900/30 border-2 border-pink-500" : ""}
+                  ${milestone ? "border-2 border-pink-400 bg-pink-50 dark:bg-pink-900/20" : ""}
+                  ${anniversary ? "border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" : ""}
+                  ${birthday ? "border-2 border-pink-500" : ""}
                 `}
               >
                 {day && (
@@ -292,8 +307,22 @@ export default function CalendarPage() {
                       <div className="w-2 h-2 bg-pink-500 rounded-full mt-3 mx-auto" />
                     )}
 
+                    {milestone && (
+                      <div className="text-center text-xs text-pink-500 mt-1">
+                        💖
+                      </div>
+                    )}
+
+                    {anniversary && (
+                      <div className="text-center text-xs text-yellow-500 mt-1">
+                        🎉
+                      </div>
+                    )}
+
                     {birthday && (
-                      <div className="text-center text-xs text-pink-500 mt-1">🎂</div>
+                      <div className="text-center text-xs text-pink-500 mt-1">
+                        🎂
+                      </div>
                     )}
                   </>
                 )}
