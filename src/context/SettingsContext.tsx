@@ -75,7 +75,7 @@ const DEFAULT_SETTINGS: CoupleSettings = {
     birthdayConfetti: true,
   },
   personalization: {
-    theme: "light",
+    theme: "system",
     accent: "pink",
     floatingHearts: true,
     backgroundGlow: true,

@@ -42,28 +42,30 @@ type ReminderType = {
 /* ================= PAGE ================= */
 
 export default function HomePage() {
-  const relationshipStartDate = "2025-12-27";
-
   const [moods, setMoods] = useState<MoodType[]>([]);
   const [latestEntry, setLatestEntry] = useState<EntryType | null>(null);
   const [reminders, setReminders] = useState<ReminderType[]>([]);
+
+  const relationshipStartDate = "2025-12-27";
 
   /* ================= DAYS TOGETHER ================= */
 
   const daysTogether = useMemo(() => {
     const start = new Date(relationshipStartDate);
     const today = new Date();
-
     start.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
 
     return Math.max(
-      Math.floor((today.getTime() - start.getTime()) / 86400000),
+      Math.floor(
+        (today.getTime() - start.getTime()) /
+          (1000 * 60 * 60 * 24)
+      ),
       0
     );
   }, []);
 
-  /* ================= MONTHS COMPLETED ================= */
+  /* ================= MONTH MILESTONE ================= */
 
   function getMonthsCompleted(startDate: string) {
     const start = new Date(startDate);
@@ -78,30 +80,14 @@ export default function HomePage() {
     return months > 0 ? months : 0;
   }
 
-  const monthsCompleted = getMonthsCompleted(relationshipStartDate);
-
-  /* ================= COUNTDOWN TO NEXT 27 ================= */
-
-  const countdownToNext27 = useMemo(() => {
-    const now = new Date();
-    const next = new Date(now);
-
-    if (now.getDate() >= 27) {
-      next.setMonth(now.getMonth() + 1);
-    }
-
-    next.setDate(27);
-    next.setHours(0, 0, 0, 0);
-
-    return Math.ceil((next.getTime() - now.getTime()) / 86400000);
-  }, []);
-
-  /* ================= SPECIAL DAY CHECKS ================= */
-
   const today = new Date();
   const isMilestoneDay = today.getDate() === 27;
   const isAnniversary =
     today.getDate() === 27 && today.getMonth() === 11;
+
+  const monthsCompleted = getMonthsCompleted(
+    relationshipStartDate
+  );
 
   /* ================= MOODS ================= */
 
@@ -129,7 +115,9 @@ export default function HomePage() {
 
     const unsub = onSnapshot(q, (snap) => {
       if (!snap.empty) {
-        setLatestEntry(snap.docs[0].data() as EntryType);
+        setLatestEntry(
+          snap.docs[0].data() as EntryType
+        );
       } else {
         setLatestEntry(null);
       }
@@ -141,7 +129,9 @@ export default function HomePage() {
   /* ================= UPCOMING REMINDERS ================= */
 
   useEffect(() => {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = new Date()
+      .toISOString()
+      .split("T")[0];
 
     const q = query(
       collection(db, "events"),
@@ -151,15 +141,17 @@ export default function HomePage() {
     );
 
     const unsub = onSnapshot(q, (snap) => {
-      const data: ReminderType[] = snap.docs.map((doc) => {
-        const d = doc.data() as DocumentData;
+      const data: ReminderType[] = snap.docs.map(
+        (doc) => {
+          const d = doc.data() as DocumentData;
 
-        return {
-          id: doc.id,
-          title: String(d.title ?? ""),
-          date: String(d.date ?? ""),
-        };
-      });
+          return {
+            id: doc.id,
+            title: String(d.title ?? ""),
+            date: String(d.date ?? ""),
+          };
+        }
+      );
 
       setReminders(data);
     });
@@ -192,7 +184,7 @@ export default function HomePage() {
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card glass"
+        className="card glass relative overflow-hidden"
       >
         <h1 className="text-4xl md:text-5xl font-extrabold text-gradient">
           Golu Diary
@@ -212,20 +204,17 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="px-4 py-2 rounded-2xl bg-white/60 dark:bg-slate-800/50 border border-pink-100 dark:border-white/10">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Next milestone
-            </p>
-            <p className="text-xl font-bold">
-              {countdownToNext27} days
-            </p>
-          </div>
-
-          <Link href="/calendar" className="btn btn-secondary">
+          <Link
+            href="/calendar"
+            className="btn btn-secondary"
+          >
             View Calendar
           </Link>
 
-          <Link href="/letters" className="btn btn-primary">
+          <Link
+            href="/letters"
+            className="btn btn-primary"
+          >
             Open Letters
           </Link>
         </div>
@@ -237,7 +226,9 @@ export default function HomePage() {
           <h2 className="text-4xl font-extrabold text-gradient mb-2">
             🎉 Happy Anniversary!
           </h2>
-          <p>Another beautiful year together 💖</p>
+          <p>
+            Another beautiful year together 💖
+          </p>
         </div>
       )}
 
@@ -301,6 +292,22 @@ export default function HomePage() {
         <QuoteOfDay />
       </div>
 
+      {/* ACTIONS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <Link href="/diary/new" className="action-card">
+          ✍️ Write Entry
+        </Link>
+        <Link href="/memories/new" className="action-card">
+          📸 Add Memory
+        </Link>
+        <Link href="/letters/new" className="action-card">
+          💌 Write Letter
+        </Link>
+        <Link href="/calendar" className="action-card">
+          📅 Calendar
+        </Link>
+      </div>
+
       {/* MID ROW */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <UnreadPreview />
@@ -319,6 +326,14 @@ export default function HomePage() {
                 <p className="mt-2 text-gray-600 dark:text-gray-400 line-clamp-3">
                   {latestEntry.body}
                 </p>
+                <div className="mt-4">
+                  <Link
+                    href="/diary"
+                    className="text-sm font-medium rd-accent-text"
+                  >
+                    View all entries →
+                  </Link>
+                </div>
               </>
             ) : (
               <p className="text-sm text-gray-500 dark:text-gray-400">
